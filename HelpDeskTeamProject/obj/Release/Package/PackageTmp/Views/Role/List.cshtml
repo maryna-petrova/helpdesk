@@ -1,0 +1,73 @@
+﻿@model HelpDeskTeamProject.Models.AppAndTeamRolesViewModel
+@using HelpDeskTeamProject.DataModels;
+@{
+    ViewBag.Title = "List";
+}
+
+
+<br/>
+<p>@Html.ActionLink("Create New App Role","CreateAppRole","Role")</p>
+
+<table class="table">
+    <tr>
+        <th>
+            @Html.DisplayName("Id")
+        </th>
+        <th>
+            @Html.DisplayName("Application role")
+        </th>       
+        <th></th>
+    </tr>
+
+    @foreach (var appRole in Model.ApplicationRoles)
+    {
+        <tr>
+            <td>
+                @Html.DisplayFor(modelItem => appRole.Id)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => appRole.Name)
+            </td>
+           
+            <td>
+                @Html.ActionLink("Edit", "EditAppRole", new { roleId = appRole.Id })
+               
+            </td>
+        </tr>
+    }
+
+</table>
+
+<br/>
+<br />
+<p>@Html.ActionLink("Create New Team Role", "CreateTeamRole", "Role")</p>
+<table class="table">
+    <tr>
+        <th>
+            @Html.DisplayName("Id")
+        </th>
+        <th>
+            @Html.DisplayName("Team role")
+        </th>
+        <th></th>
+    </tr>
+
+    @foreach (var teamRole in Model.TeamRoles)
+    {
+        <tr>
+            <td>
+                @Html.DisplayFor(modelItem => teamRole.Id)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => teamRole.Name)
+            </td>
+
+            <td>
+                @Html.ActionLink("Edit", "EditTeamRole", new { roleId = teamRole.Id })
+
+            </td>
+        </tr>
+    }
+
+</table>
+

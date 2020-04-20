@@ -1,0 +1,106 @@
+﻿@model HelpDeskTeamProject.Models.ManageTeamViewModel
+
+@{
+    ViewBag.Title = "ManageTeam";
+}
+
+<div class="row">
+    <div class="col-md-2">
+
+    </div>
+    <div class="col-md-8">
+        <h4>Manage Team "@Model.Team.Name"</h4>
+
+        @if (Model.TeamMembers.Count < 1)
+    {
+        <p>No members in this team.</p>
+}
+else
+{
+
+    <table id="@Model.Team.Id" class="table team">
+
+        <tr>
+            <th>First Name</th>
+            <th>Last Name</th>
+            <th>Role</th>
+            <th></th>
+            <th></th>
+        </tr>
+
+        @foreach (var item in Model.TeamMembers)
+    {
+        <tr class="userinfo" id="@item.TeamMember.Id">
+            <td>@item.TeamMember.Name</td>
+            <td>@item.TeamMember.Surname</td>
+            <td class="role">
+                @Html.DropDownList("UserRole", item.AvailableTeamRoles, htmlAttributes: new { @class = "form-control", @style = "width:200px;" })
+            </td>
+            <td><button type="button" class="btn btn-primary savebtn">Save</button></td>
+            <td><button type="button" class="btn btn-primary delbtn">Delete</button></td>
+        </tr>
+
+}
+
+    </table>
+}
+        <hr />
+        <br />
+        <br />
+        @Html.ActionLink("Invite user", "InviteUser", new { teamId = Model.Team.Id })
+        <br />
+        <br />
+        @if (Model.Team.InvitedUsers.Count < 1)
+    {
+        <p>No invited users in this team.</p>
+}
+else
+{
+    
+    
+        <div id="inverror" class="alert alert-danger alert-dismissible hidden">
+            <a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a>
+            <strong>Danger!</strong> You can not send an invitation more than once a day.
+        </div>
+    
+    
+        <div id="invsuc" class="alert alert-success alert-dismissible hidden">
+            <a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a>
+            <strong>Success!</strong> Invitation email was sent successfully.
+        </div>
+    
+        <div id="invmsg"></div>
+        
+        <p>Invited users:</p>
+        <table id="@Model.Team.Id" class="table invitedusers">
+            <tr>
+                <th>Email</th>
+                <th>Invitation Time</th>
+                <th></th>
+            </tr>
+            @foreach (var invitedUser in Model.Team.InvitedUsers)
+        {
+            <tr class="inviteduser" id="@invitedUser.Id">
+                <td>@invitedUser.Email</td>
+                <td>@invitedUser.TimeOfLastInvitation</td>
+                <td><button type="button" class="btn btn-primary invbtn">Invite again</button></td>
+            </tr>
+    }
+
+        </table>
+
+
+
+        }
+    </div>
+    <div class="col-md-2">
+
+    </div>
+
+</div>
+
+
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+<script src="~/Scripts/ManageTeam.js"></script>
+
+

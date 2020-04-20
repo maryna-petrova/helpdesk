@@ -1,0 +1,72 @@
+﻿@using HelpDeskTeamProject.DataModels
+@{
+    string[] statusColorsArray = { StatusColors.orangered.ToString(),
+        StatusColors.darkorange.ToString(),
+        StatusColors.limegreen.ToString(),
+        StatusColors.dimgrey.ToString() };
+
+    string[] ticketStateNames = { TicketState.New.ToString(), TicketState.InProgress.ToString(),
+        TicketState.Done.ToString(), TicketState.Rejected.ToString() };
+}
+<link rel="stylesheet" href="~/Content/MaterialStyles.css" type="text/css">
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+<script>
+    var teamId;
+    var emptyTeamTickets = false;
+    var teamPermissions = null;
+    var canChangeTicketState = false;
+    var statusNames = @Html.Raw(Json.Encode(ticketStateNames));
+    var statusColorsJs = @Html.Raw(Json.Encode(statusColorsArray));
+</script>
+<script src="~/Scripts/TicketsScripts.js"></script>
+
+<br/>
+<br />
+<div class="row">
+    <div class="col-md-3">
+        <br />
+        <div class="list-group" id="teamsmenu">
+
+        </div>
+
+    </div>
+    <div class="col-md-9">
+
+        <br/>
+        
+        <div id="manageteamdiv" class="addButtonDiv hidden">
+            <p id="managetext" style="padding-top: 1px"></p>
+
+        </div>
+        <p id="noteamsmsg"></p>
+
+<div id="baseDiv">
+    <div id="newTicketInput" style="display: none;">
+
+        <div class="card">
+            <h5 class="headerMargin"><b>Add New Ticket</b></h5>
+            <div class="inputTicketDiv">
+                <textarea id="addTicketText" class="inputTicketText" placeholder="Write here your problem or suggestion..."></textarea>
+            </div>
+            <div style="padding-bottom: 15px; padding-right: 15px; padding-left: 15px;">
+                <div class="selectType">
+                    <select id="addTicketType" style="width:100%; min-width:100%; height: 20px; transition: 0.3s;">
+                        <option value="0">Select type</option>
+                        @for (int counter = 0; counter < ViewBag.TicketTypes.Count; counter++)
+                        {
+                            <option value="@(counter + 1)">@ViewBag.TicketTypes[counter].Name</option>
+                        }
+                    </select>
+                </div>
+                <div class="addButtonDiv" onclick="addTicket();">
+                    <p style="padding-top: 1px;">Add</p>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div id="ticketsDiv">
+
+    </div>
+</div>
+</div>
+</div>

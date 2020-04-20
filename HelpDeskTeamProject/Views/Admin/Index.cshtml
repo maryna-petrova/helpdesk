@@ -1,0 +1,81 @@
+﻿@using HelpDeskTeamProject.DataModels;
+@using Microsoft.AspNet.Identity;
+@model dynamic
+@{
+    ViewBag.Title = "Index";
+}
+
+<link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.10.16/css/jquery.dataTables.css">
+
+<h2>@ViewBag.Message</h2>
+
+<h1>Admin Panel</h1>
+<table>
+    <tr>
+        <td>
+            <button type="button" class="btn btn-success" onclick="location.href='@Url.Action("ShowAdminLogs", "Admin")'">Admin Logs</button>
+        </td>
+        <td>
+            <button type="button" class="btn btn-warning" onclick="location.href='@Url.Action("List", "Role")'">List of roles</button>
+        </td>
+        <td>
+            <button type="button" class="btn btn-danger" onclick="location.href='@Url.Action("TypeList", "Ticket")'">Types of tickets</button>
+        </td>
+        <td>
+            <button type="button" class="btn primary" onclick="location.href='@Url.Action("EditRolesList", "Admin")'">Edit roles list</button>
+        </td>
+        <td>
+            <button type="button" class="btn btn-default" onclick="location.href='@Url.Action("ShowStats", "Admin")'">Statistics</button>
+        </td>
+    </tr>
+    <tr>
+        
+    </tr>
+</table>
+
+<h3>List of Users</h3>
+
+<table id="userList" class="display">
+    <thead>
+        <tr>
+            <th>Id</th>
+            <th>Name</th>
+            <th>Surname</th>
+            <th>AppRole</th>
+            <th>Edit AppRole</th>
+            <th>Teams and Roles</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (User user in Model.Users)
+        {
+            <tr>
+                <td>@user.Id</td>
+                <td>@user.Name</td>
+                <td>@user.Surname</td>
+                @if (user.IsAdmin)
+                {
+                    <td>Admin</td>
+                }
+                else
+                {
+                    <td>Regular user</td>
+                }
+                <td><button type="button" class="btn btn-default">@Html.ActionLink("Edit", "Edit", new { id = user.Id })</button></td>
+                <td><button type="button" class="btn">@Html.ActionLink("Show Teams and Roles", "GetTeamsAndRoles", new { id = user.Id })</button></td>
+            </tr>
+        }
+    </tbody>
+</table>
+
+
+
+
+@section scripts{
+    <script type="text/javascript" charset="utf8" src="https://cdn.datatables.net/1.10.16/js/jquery.dataTables.js"></script>
+    <script>
+        $(document).ready(function () {
+            $('#userList').DataTable();
+        });
+    </script>
+}

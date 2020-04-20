@@ -1,0 +1,61 @@
+﻿@model HelpDeskTeamProject.Models.InviteUserToTeamViewModel
+
+
+@{
+    ViewBag.Title = "InviteUser";
+}
+<div class="row">
+    <div class="col-md-3">
+    </div>
+    <div class="col-md-6">
+        <br />
+        <br />
+        <br />
+        <p class="text-danger">@ViewBag.ErrorMessage</p>
+        @using (Html.BeginForm())
+    {
+        <div class="form-horizontal">
+
+            @Html.EditorFor(model => model.TeamToInvite.Id, new { htmlAttributes = new { @class = "form-control hidden" } })
+
+            <div class="form-group">
+                @Html.Label("Team name:", htmlAttributes: new { @class = "control-label col-md-4" })
+                <div class="col-md-6">
+                    @Html.DisplayFor(model => model.TeamToInvite.Name, new { htmlAttributes = new { @class = "form-control" } })
+                    @Html.ValidationMessageFor(model => model.TeamToInvite.Name, "", new { @class = "text-danger" })
+                </div>
+            </div>
+
+            @Html.EditorFor(model => model.TeamToInvite.Name, new { htmlAttributes = new { @class = "form-control hidden" } })
+
+
+            <div class="form-group">
+                @Html.Label("Email of user:", htmlAttributes: new { @class = "control-label col-md-4" })
+                <div class="col-md-6">
+                    @Html.EditorFor(model => model.EmailOfInvitedUser, new { htmlAttributes = new { @class = "form-control" } })
+                    @Html.ValidationMessageFor(model => model.EmailOfInvitedUser, "", new { @class = "text-danger" })
+                </div>
+            </div>
+
+            <div class="form-group">
+                <div class="col-md-offset-2 col-md-10">
+                    <input type="submit" value="Invite User" class="btn btn-default" />
+                </div>
+            </div>
+            <br />
+            <div>
+                @Html.ActionLink("Back to Team Management", "ManageTeam", "Teams", new { teamId = Model.TeamToInvite.Id }, new { @style = "margin-left:80px;" })
+
+
+            </div>
+        </div>
+
+        
+}
+    </div>
+    <div class="col-md-3">
+    </div>
+</div>
+
+        
+

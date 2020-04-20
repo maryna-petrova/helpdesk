@@ -1,0 +1,190 @@
+﻿@model HelpDeskTeamProject.DataModels.TicketDTO
+@using HelpDeskTeamProject.DataModels
+@{
+    string[] statusColorsArray = { StatusColors.orangered.ToString(),
+        StatusColors.darkorange.ToString(),
+        StatusColors.limegreen.ToString(),
+        StatusColors.dimgrey.ToString() };
+
+    string[] ticketStateNames = { TicketState.New.ToString(), TicketState.InProgress.ToString(),
+        TicketState.Done.ToString(), TicketState.Rejected.ToString() };
+}
+
+<link rel="stylesheet" href="~/Content/MaterialStyles.css" type="text/css">
+<script src="~/Scripts/ShowScripts.js"></script>
+<script>
+    var curTicketId = @Model.Id;
+    var curTeamId = @Model.TeamId;
+    var emptyTickets = false;
+    var emptyComments = false;
+    var emptyLogs = false;
+    var teamPermissions = null;
+    var canChangeTicketState = false;
+    var commentsOrLogs = true; //true - comments, false - logs
+    var statusNames = @Html.Raw(Json.Encode(ticketStateNames));
+    var statusColorsJs = @Html.Raw(Json.Encode(statusColorsArray));
+
+    document.addEventListener('DOMContentLoaded', function () {
+        getTeamPermissions();
+    }, false);
+</script>
+
+<h2>Show Ticket</h2>
+
+<div>
+    <div class="pageDivideLeft">
+        <div class="card">
+            <div class="statusRect" id="@string.Concat("strect_", Model.Id)" style="background-color: @statusColorsArray[(int)Model.State];"></div>
+            <h5 class="headerMargin"><b>@Model.UserName</b> <b>@Model.UserSurname</b></h5>
+            <h5 class="dateTime">@Model.TimeCreated</h5>
+            <h5 class="ticketStatus" id="@string.Concat("stdisp_", Model.Id)" onclick="changeStateClick(@Model.Id)" style="color:@statusColorsArray[(int)Model.State];"><b>@Model.State.ToString()</b></h5>
+            @if (Model.CanDelete)
+            {
+                <h5 class="deleteButton" onclick="deleteThisTicket()">Delete</h5>
+            }
+            <div class="cardText">
+                <p>@Html.Raw(Model.Description)</p>
+                <div class="themeText" onclick="themeTextClick()">@Model.Type.Name</div>
+            </div>
+            <div class="divideLine"></div>
+            <div class="replyRectangle">
+                @*<div class="replyTextMargin">Reply</div>*@
+                <div class="replyTextMargin" id="commentsOrLogsButton" onclick="commentsOrLogsButtonClick()">Logs</div>
+                @if (Model.CanEdit)
+                {
+                    <div class="replyTextMargin" onclick="editButtonClick(@Model.Id)">Edit</div>
+                }
+                <div class="replyTextMargin"><img src="~/Content/comments.png" style="padding-bottom:1px;" /><b id="ticketCommentsCount"> @Model.CommentsCount</b></div>
+                <div class="replyTextMargin"><img src="~/Content/ticket.png" style="padding-bottom:1px;" /><b id="ticketChildsCount"> @Model.ChildTicketsCount</b></div>
+            </div>
+        </div>
+        <div class="card" id="inputCommentDiv" style="display: none;">
+            <h5 class="headerMargin"><b>Add New Comment</b></h5>
+            <div class="inputTicketDiv">
+                <textarea id="addCommentText" class="inputTicketText" style="height: 55px;" placeholder="Write here your comment..."></textarea>
+            </div>
+            <div style="padding-bottom: 15px; padding-right: 15px; padding-left: 15px;">
+                <div class="addButtonDiv" style="width: 100%;" onclick="addComment();">
+                    <p style="padding-top: 1px;">Add</p>
+                </div>
+            </div>
+        </div>
+        <div id="mainDisplay">
+            @if (Model.Comments.Count > 0)
+            {
+                foreach (var comment in Model.Comments)
+                {
+                    <div class="card" id="@String.Concat("comment_" + comment.Id)">
+                    <h5 class="headerMargin"><b>@comment.UserName</b> <b>@comment.UserSurname</b></h5>
+                    <h5 class="dateTime">@comment.TimeCreated</h5>
+                    @if (comment.CanDelete)
+                    {
+                        <h5 class="deleteButton" onclick="deleteComAndHide(@comment.Id)">Delete</h5>
+                    }
+                        <div class="commentText">
+                            <p>@Html.Raw(comment.Text)</p>
+                        </div>
+                    </div>
+                }
+            }
+            else
+            {
+                <script>emptyComments = true;</script>
+                <div class="card">
+                    <div class="systemMessageText">
+                        This ticket does not have any comments, try adding more by clicking reply button.
+                    </div>
+                </div>
+            }
+        </div>
+        <div id="logsDisplay" style="display: none;">
+            @if (Model.Logs.Count > 0)
+            {
+                foreach (var log in Model.Logs)
+                {
+                    <div class="card">
+                    <h5 class="headerMargin"><b>@log.UserName</b> <b>@log.UserSurname</b></h5>
+                    <h5 class="dateTime">@log.Time</h5>
+                        <div class="commentText">
+                            <p>@log.Text</p>
+                        </div>
+                    </div>
+                }
+            }
+            else
+            {
+                <script>emptyLogs = true;</script>
+                <div class="card">
+                    <div class="systemMessageText">
+                        This ticket does not have any logs, they appear when something changes.
+                    </div>
+                </div>
+            }
+        </div>
+    </div>
+    <div class="pageDivideRight">
+        <div class="card" id="inputTicketDiv" style="display: none;">
+            <h5 class="headerMargin"><b>Add New Ticket</b></h5>
+            <div class="inputTicketDiv">
+                <textarea id="addTicketText" class="inputTicketText" placeholder="Write here your problem or suggestion..."></textarea>
+            </div>
+            <div style="padding-bottom: 15px; padding-right: 15px; padding-left: 15px;">
+                <div class="selectType">
+                    <select id="addTicketType" style="width:100%; min-width:100%; height: 20px; transition: 0.3s;">
+                        <option value="0">Select type</option>
+                        @for (int counter = 0;counter < ViewBag.TicketTypes.Count; counter++)
+                        {
+                            <option value="@(counter + 1)">@ViewBag.TicketTypes[counter].Name</option>
+                        }
+                    </select>
+                </div>
+                <div class="addButtonDiv" onclick="addTicket();">
+                    <p style="padding-top: 1px;">Add</p>
+                </div>
+            </div>
+        </div>
+        <div id="ticketsDisplay">
+            @if (Model.ChildTickets.Count > 0)
+            {
+                foreach (var childTicket in Model.ChildTickets)
+                {
+                    <div class="card" id="@String.Concat("ticket_" + childTicket.Id)">
+                        <div class="statusRect" id="@string.Concat("strect_", childTicket.Id)" style="background-color: @statusColorsArray[(int)childTicket.State]"></div>
+                        <h5 class="headerMargin"><b>@childTicket.UserName</b> <b>@childTicket.UserSurname</b></h5>
+                        <h5 class="dateTime">@childTicket.TimeCreated</h5>
+                        <h5 class="ticketStatus" id="@string.Concat("stdisp_", childTicket.Id)" onclick="changeStateClick(@childTicket.Id)" style="color:@statusColorsArray[(int)childTicket.State];"><b>@childTicket.State.ToString()</b></h5>
+                        @if (childTicket.CanDelete)
+                        {
+                            <h5 class="deleteButton" onclick="deleteAndHide(@childTicket.Id)">Delete</h5>
+                        }
+                        <div class="cardText">
+                            <p>@Html.Raw(childTicket.Description)</p>
+                            <div class="themeText" onclick="themeTextClick()">@childTicket.Type.Name</div>
+                        </div>
+                        <div class="divideLine"></div>
+                        <div class="replyRectangle">
+                            <div class="replyTextMargin" onclick="showButtonClick(@childTicket.Id)">Show</div>
+                            @if (childTicket.CanEdit)
+                            {
+                                <div class="replyTextMargin" onclick="editButtonClick(@childTicket.Id)">Edit</div>
+                            }
+                            <div class="replyTextMargin"><img src="~/Content/comments.png" style="padding-bottom:1px;" /><b> @childTicket.CommentsCount</b></div>
+                            <div class="replyTextMargin"><img src="~/Content/ticket.png" style="padding-bottom:1px;" /><b> @childTicket.ChildTicketsCount</b></div>
+                        </div>
+                    </div>
+                }
+            }
+            else
+            {
+                <script>emptyTickets = true;</script>
+                <div class="card">
+                        <div class="systemMessageText">
+                            This ticket does not have any child tickets, try adding more by clicking add button.
+                        </div>
+                </div>
+            }
+        </div>
+    </div>
+</div>
+
+
